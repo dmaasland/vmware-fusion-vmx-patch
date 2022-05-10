@@ -1,0 +1,10 @@
+# Put these in your VM VMX file
+mainmem.backing = "swap" # Disable swap
+MemTrimRate = "0" # Disable returning unused memory
+sched.mem.pshare.enable = "FALSE" # Disable page sharing
+prefvmx.useRecommendedLockedMemSize = "TRUE" # Force memory to be pre-allocated on host
+scsi0.virtualDev = "pvscsi" # Fasted disk i/o subsystem (requires driver off pvscsi.flp floppy disk image)
+scsi0:0.virtualSSD = 1 # If running off an SSD
+MemAllowAutoScaleDown = "FALSE"
+ulm.disableMitigations = "TRUE" # Disable side-channel mitigations
+ethernet0.virtualDev = "vmxnet3" # Use paravirtualized network adapter
