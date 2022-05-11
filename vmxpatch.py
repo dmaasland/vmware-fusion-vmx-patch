@@ -5,7 +5,7 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path, PurePath
 from shutil import copy
 from time import time
-from typing import Dict, Optional
+from typing import Callable, Dict, List, Optional, Tuple
 
 
 class VmxEncryptedError(Exception):
@@ -36,7 +36,7 @@ def parse_args() -> Namespace:
     return args
 
 
-def find_vmx(vm_dir) -> Optional[Path]:
+def find_vmx(vm_dir: str) -> Optional[Path]:
     vmx_files = Path(vm_dir).glob("*.vmx")
     vmx = next(vmx_files, None)
 
@@ -49,13 +49,13 @@ def find_vmx(vm_dir) -> Optional[Path]:
     return vmx
 
 
-def backup_vmx(vmx) -> None:
+def backup_vmx(vmx: Path) -> None:
     backup_file = PurePath(vmx.parent, f"{vmx.name}.{int(time())}.backup")
     logging.info(f"Creating backup file {backup_file}")
     copy(vmx, backup_file)
 
 
-def patch_vmx(args) -> None:
+def patch_vmx(args: Namespace) -> None:
     for vm_dir in args.vm_dir:
         logging.debug(f"Processing directory {vm_dir}")
 
@@ -90,7 +90,7 @@ def patch_vmx(args) -> None:
                 f.write(option)
 
 
-def parse_vmx(vmx) -> Dict[str, str]:
+def parse_vmx(vmx: Path) -> Dict[str, str]:
     parsed_vmx: Dict[str, str] = {}
 
     with open(vmx, "r") as f:
@@ -99,9 +99,12 @@ def parse_vmx(vmx) -> Dict[str, str]:
             if line.startswith("#"):
                 continue
 
-            vmx_temp = line.split("=")
-            vmx_key = vmx_temp[0].strip()
-            vmx_value = "=".join(vmx_temp[1:]).strip()
+            vmx_kv: Callable[[List[str]], Tuple[str, str]] = lambda x: (
+                x[0].strip(),
+                "=".join(x[1:]).strip(),
+            )
+
+            vmx_key, vmx_value = vmx_kv(line.split("="))
             parsed_vmx.update({vmx_key: vmx_value})
 
     if "encryption.data" in parsed_vmx:
