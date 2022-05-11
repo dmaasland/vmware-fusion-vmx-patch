@@ -1,6 +1,6 @@
 # VMware Fusion VMX optimizer
 
-Makes VM's not suck on VMware Fusion
+Makes VMs not suck on VMware Fusion
 
 ## Create alias
 
